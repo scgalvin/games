@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shoe Flip</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: sans-serif;
+      background: #f9f9f9;
+      color: #222;
+      padding: 10px;
+      margin: 0;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    h1 { 
+      margin-bottom: 10px; 
+      font-size: 2.2em;
+    }
+
+    h2 { 
+      font-size: 1.5em; 
+      margin-bottom: 8px;
+      margin-top: 15px;
+    }
+
+    .top-controls {
+      margin-bottom: 15px;
+    }
+
+    .stats, .shop, .inventory {
+      margin-bottom: 20px;
+      font-size: 1.1em;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 100%;
+      margin-top: 10px;
+      table-layout: auto;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 12px 8px;
+      text-align: center;
+      white-space: nowrap;
+      line-height: 1.3;
+      font-size: 1.1em;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+      
+      table {
+        font-size: 1em;
+      }
+      
+      th, td {
+        padding: 10px 6px;
+        font-size: 1em;
+      }
+      
+      .price-range {
+        font-size: 0.9em;
+      }
+
+      h1 {
+        font-size: 2em;
+      }
+
+      h2 {
+        font-size: 1.3em;
+      }
+
+      button {
+        font-size: 1em;
+        padding: 10px 14px;
+        min-height: 42px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      table {
+        font-size: 0.95em;
+      }
+      
+      th, td {
+        padding: 8px 4px;
+        font-size: 0.95em;
+      }
+      
+      button {
+        padding: 10px 12px;
+        font-size: 0.95em;
+        min-height: 40px;
+        min-width: 50px;
+      }
+      
+      .price-range {
+        font-size: 0.8em;
+      }
+      
+      .stats {
+        font-size: 1em;
+      }
+
+      h1 {
+        font-size: 1.8em;
+        margin-bottom: 8px;
+      }
+
+      h2 {
+        font-size: 1.2em;
+      }
+    }
+
+    button {
+      padding: 12px 16px;
+      margin-left: 10px;
+      cursor: pointer;
+      font-size: 1.1em;
+      min-height: 44px;
+      min-width: 60px;
+      border: 2px solid #ccc;
+      border-radius: 6px;
+      background: #f5f5f5;
+      color: #333;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #e0e0e0;
+    }
+
+    button:active {
+      background: #d0d0d0;
+    }
+
+    .dark {
+      background: #111;
+      color: #f0f0f0;
+    }
+
+    .dark table th,
+    .dark table td {
+      border-color: #444;
+    }
+
+    .dark button {
+      background: #444;
+      color: #eee;
+      border: 2px solid #666;
+    }
+
+    .dark button:hover {
+      background: #555;
+    }
+
+    .dark button:active {
+      background: #333;
+    }
+
+    .price-range {
+      font-size: 0.9em;
+      color: #666;
+    }
+
+    .dark .price-range {
+      color: #aaa;
+    }
+
+    .flash {
+      background-color: #4CAF50 !important;
+      transition: background-color 0.1s ease;
+    }
+
+    .dark .flash {
+      background-color: #66BB6A !important;
+    }
+
+    .screen-flash {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 0, 0, 0.3);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.1s ease;
+      z-index: 9999;
+    }
+
+    .screen-flash.active {
+      opacity: 1;
+    }
+
+    .game-over {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.9);
+      color: white;
+      padding: 40px;
+      text-align: center;
+      border-radius: 10px;
+      font-size: 1.5em;
+      z-index: 10000;
+      display: none;
+      max-width: 90vw;
+      max-height: 90vh;
+      overflow: auto;
+    }
+
+    .game-over h2 {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      color: #ff6b6b;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .game-over .final-score {
+      font-size: 1.8em;
+      margin-bottom: 20px;
+      color: #4CAF50;
+    }
+
+    .game-over button {
+      font-size: 1.2em;
+      padding: 10px 20px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .game-over button:hover {
+      background: #45a049;
+    }
+
+    @media (max-width: 480px) {
+      .game-over {
+        padding: 20px;
+        font-size: 1.2em;
+      }
+
+      .game-over h2 {
+        font-size: 2em;
+      }
+
+      .game-over .final-score {
+        font-size: 1.5em;
+      }
+
+      .game-over button {
+        font-size: 1em;
+        padding: 8px 16px;
+      }
+    }
+  </style>
+</head>
+<body class="dark">
+  <div class="screen-flash" id="screenFlash"></div>
+  <div class="game-over" id="gameOver">
+    <h2>GAME OVER</h2>
+    <div class="final-score">Final Score: $<span id="finalScore">0.00</span></div>
+    <button onclick="resetGame()">Play Again</button>
+  </div>
+  
+  <h1>Shoe Flip</h1>
+  
+  <div class="top-controls">
+    <button onclick="nextDay()">Next Day</button>
+    <button onclick="resetGame()">Restart Game</button>
+  </div>
+
+  <div class="stats">
+    <strong>Day:</strong> <span id="day">1</span> / 10
+    &nbsp;&nbsp;&nbsp;
+    <strong>Cash:</strong> $<span id="cash">1000.00</span>
+  </div>
+
+  <div class="shop">
+    <h2>Marketplace</h2>
+    <table id="market">
+      <thead>
+        <tr>
+          <th>Shoe Type</th>
+          <th>Price</th>
+          <th>Price Range</th>
+          <th>Buy</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="inventory">
+    <h2>Your Inventory</h2>
+    <table id="inventory">
+      <thead>
+        <tr>
+          <th>Shoe Type</th>
+          <th>Qty</th>
+          <th>Purchase Price</th>
+          <th>Sell</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    const shoeTypes = [
+      "Sandals", "Loafers", "Skate", "Running", "Sneakers",
+      "Hiking", "Work", "Boots", "Dress", "Fashion"
+    ];
+
+    const basePrices = [10, 30, 50, 80, 120, 200, 300, 800, 1200, 25000];
+    const inventory = {};
+    const prices = {};
+    const purchasePrices = {};
+    let cash = 1000;
+    let day = 1;
+    const maxDays = 10;
+
+    // Cookie management functions
+    function setCookie(name, value, days) {
+      const date = new Date();
+      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+      const expires = "expires=" + date.toUTCString();
+      document.cookie = `${name}=${encodeURIComponent(value)};${expires};path=/;SameSite=Lax`;
+    }
+
+    function getCookie(name) {
+      const nameEQ = name + "=";
+      const cookies = document.cookie.split(';');
+      for (let cookie of cookies) {
+        let c = cookie.trim();
+        if (c.indexOf(nameEQ) === 0) {
+          return decodeURIComponent(c.substring(nameEQ.length));
+        }
+      }
+      return null;
+    }
+
+    function deleteCookie(name) {
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
+    }
+
+    // Game state management
+    function saveGameState() {
+      try {
+        const gameState = {
+          cash: cash,
+          day: day,
+          inventory: inventory,
+          purchasePrices: purchasePrices,
+          prices: prices,
+          timestamp: Date.now()
+        };
+        
+        const jsonString = JSON.stringify(gameState);
+        setCookie('shoeFlipSave', jsonString, 30); // Save for 30 days
+        console.log('Game saved successfully');
+        return true;
+      } catch (error) {
+        console.error('Failed to save game:', error);
+        return false;
+      }
+    }
+
+    function loadGameState() {
+      try {
+        const savedData = getCookie('shoeFlipSave');
+        if (savedData) {
+          const gameState = JSON.parse(savedData);
+          
+          // Restore game variables
+          cash = gameState.cash || 1000;
+          day = gameState.day || 1;
+          
+          // Restore objects
+          Object.assign(inventory, gameState.inventory || {});
+          Object.assign(purchasePrices, gameState.purchasePrices || {});
+          Object.assign(prices, gameState.prices || {});
+          
+          console.log('Game loaded successfully');
+          return true;
+        }
+      } catch (error) {
+        console.error('Failed to load game:', error);
+      }
+      return false;
+    }
+
+    function deleteGameSave() {
+      deleteCookie('shoeFlipSave');
+      console.log('Game save deleted');
+    }
+
+    // Debounced save function to prevent excessive saves
+    let saveTimeout;
+    function debouncedSave() {
+      clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(saveGameState, 1000); // Save 1 second after last action
+    }
+
+    function randomPrice(base, shoeType) {
+      let min, max;
+      
+      if (shoeType === "Fashion") {
+        // Fashion shoes have extreme price swings: $800 to $100,000
+        min = 800;
+        max = 100000;
+      } else {
+        // All other shoes use the normal 40%-160% range
+        min = base * 0.4;
+        max = base * 1.6;
+      }
+      
+      return Math.floor(Math.random() * (max - min) + min);
+    }
+
+    function getPriceRange(base, shoeType) {
+      if (shoeType === "Fashion") {
+        return "$800 - $100,000";
+      } else {
+        const min = Math.floor(base * 0.4);
+        const max = Math.floor(base * 1.6);
+        return `$${min} - $${max}`;
+      }
+    }
+
+    function generatePrices() {
+      shoeTypes.forEach((type, i) => {
+        prices[type] = randomPrice(basePrices[i], type);
+      });
+    }
+
+    function updateUI() {
+      document.getElementById("day").textContent = day;
+      document.getElementById("cash").textContent = cash.toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+
+      const market = document.querySelector("#market tbody");
+      market.innerHTML = "";
+      shoeTypes.forEach((type, i) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${type}</td>
+          <td>$${prices[type].toLocaleString()}</td>
+          <td class="price-range">${getPriceRange(basePrices[i], type)}</td>
+          <td><button onclick="buy('${type}')">Buy</button></td>
+        `;
+        market.appendChild(row);
+      });
+
+      const inv = document.querySelector("#inventory tbody");
+      inv.innerHTML = "";
+      shoeTypes.forEach(type => {
+        const qty = inventory[type] || 0;
+        if (qty > 0) {
+          const avgPrice = purchasePrices[type]?.toFixed(2) || "—";
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${type}</td>
+            <td>${qty}</td>
+            <td>$${parseFloat(avgPrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td><button onclick="sell('${type}')">Sell</button></td>
+          `;
+          inv.appendChild(row);
+        }
+      });
+    }
+
+    function flashButton(button) {
+      button.classList.add('flash');
+      setTimeout(() => {
+        button.classList.remove('flash');
+      }, 150);
+    }
+
+    function flashScreen(color = 'red') {
+      const screenFlash = document.getElementById('screenFlash');
+      if (color === 'green') {
+        screenFlash.style.backgroundColor = 'rgba(0, 255, 0, 0.3)';
+      } else {
+        screenFlash.style.backgroundColor = 'rgba(255, 0, 0, 0.3)';
+      }
+      screenFlash.classList.add('active');
+      setTimeout(() => {
+        screenFlash.classList.remove('active');
+      }, 100);
+    }
+
+    function showGameOver() {
+      document.getElementById("finalScore").textContent = cash.toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+      document.getElementById("gameOver").style.display = "block";
+    }
+
+    function hideGameOver() {
+      document.getElementById("gameOver").style.display = "none";
+    }
+
+    function buy(type) {
+      const price = prices[type];
+      if (cash >= price) {
+        cash -= price;
+        inventory[type] = (inventory[type] || 0) + 1;
+
+        if (!purchasePrices[type]) {
+          purchasePrices[type] = price;
+        } else {
+          const totalQty = inventory[type];
+          const prevTotal = (purchasePrices[type] * (totalQty - 1));
+          purchasePrices[type] = (prevTotal + price) / totalQty;
+        }
+
+        // Flash the button and screen
+        const button = event.target;
+        flashButton(button);
+        flashScreen('green');
+
+        updateUI();
+        debouncedSave(); // Auto-save after purchase
+      } else {
+        alert("Not enough cash!");
+      }
+    }
+
+    function sell(type) {
+      if (inventory[type] > 0) {
+        cash += prices[type];
+        inventory[type]--;
+        if (inventory[type] === 0) {
+          delete purchasePrices[type];
+        }
+
+        // Flash the button and screen
+        const button = event.target;
+        flashButton(button);
+        flashScreen();
+
+        updateUI();
+        debouncedSave(); // Auto-save after sale
+      } else {
+        alert("You don't have any to sell!");
+      }
+    }
+
+    function nextDay() {
+      if (day >= maxDays) {
+        showGameOver();
+        return;
+      }
+      day++;
+      generatePrices();
+      updateUI();
+      debouncedSave(); // Auto-save after day change
+    }
+
+    function resetGame() {
+      hideGameOver();
+      cash = 1000;
+      day = 1;
+      shoeTypes.forEach(type => {
+        inventory[type] = 0;
+        purchasePrices[type] = undefined;
+      });
+      generatePrices();
+      updateUI();
+      deleteGameSave(); // Clear saved game when resetting
+    }
+
+    // Initialize game - try to load saved state first
+    if (!loadGameState()) {
+      // No saved game found, start fresh
+      generatePrices();
+    }
+    updateUI();
+
+    // Auto-save on page unload
+    window.addEventListener('beforeunload', function() {
+      saveGameState();
+    });
+
+    // Auto-save when page becomes hidden (mobile/tab switching)
+    document.addEventListener('visibilitychange', function() {
+      if (document.hidden) {
+        saveGameState();
+      }
+    });
+  </script>
+</body>
+</html>
